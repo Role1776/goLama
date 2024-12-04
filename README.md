@@ -2,7 +2,7 @@ goLama — Neural Network API Integration Library goLama is a lightweight Go lib
 
 Features Streamlined Integration: Quickly connect to APIs like Ollama without writing excessive boilerplate code. Timeout Management: Pre-configured HTTP client prevents indefinite hanging of requests. Error Logging: Built-in utility for tracking and debugging issues. Customizable Settings: Easily adjust default parameters to fit your application needs. Installation Before using this library, ensure Ollama is installed and running. Then, install goLama via Go modules:
 
-go get github.com/Role1776/goLama
+	go get github.com/Role1776/goLama
 Usage Example Here's an example of how to use goLlama to interact with Ollama's API:
 
 	package main
