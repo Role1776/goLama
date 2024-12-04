@@ -22,7 +22,7 @@ Usage Example Here's an example of how to use goLlama to interact with Ollama's 
     	prompt := "Explain quantum physics in simple terms."
 
     	// Send a request to the API and get the response
-    	response, err := goLlama.GenerateResponse(url, model, prompt)
+    	response, err := lama.GenerateResponse(url, model, prompt)
    		if err != nil {
 	   		// Log any error encountered
 	    		fmt.Println("Error:", err)
