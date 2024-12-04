@@ -8,28 +8,28 @@ Usage Example Here's an example of how to use goLlama to interact with Ollama's 
 	package main
 
 	import (
-    		"fmt"
-    		"github.com/Role1776/goLama"
+    	"fmt"
+    	"github.com/Role1776/goLama"
 	)
 
 	func main() {
 
-    		// Define the API endpoint
-    		url := "http://localhost:11434/api/generate"
+    	// Define the API endpoint
+    	url := "http://localhost:11434/api/generate"
 
 		// Specify the model and the prompt
    			model := "llama3"
-    			prompt := "Explain quantum physics in simple terms."
+    	prompt := "Explain quantum physics in simple terms."
 
-    		// Send a request to the API and get the response
-    		response, err := goLlama.GenerateResponse(url, model, prompt)
+    	// Send a request to the API and get the response
+    	response, err := goLlama.GenerateResponse(url, model, prompt)
    		if err != nil {
-	   		 // Log any error encountered
+	   		// Log any error encountered
 	    		fmt.Println("Error:", err)
 	    		return
-    		}
+    	}
 
-    		// Display the received response
+    	// Display the received response
    	 	fmt.Println("Response:", response)
 	}
 Key Points Request Automation: Automatically constructs payloads and manages headers. Timeout Control: Comes with a default 100-second timeout, adjustable for your API's responsiveness. Multi-Part Decoding: Ensures complete data retrieval for chunked responses. Configuration You can modify the timeout duration by changing the defaultTimeout constant in the library:
