@@ -9,7 +9,7 @@ Usage Example Here's an example of how to use goLlama to interact with Ollama's 
 
 	import (
     	"fmt"
-    	"github.com/Role1776/goLama"
+    	"github.com/Role1776/goLama/lama"
 	)
 
 	func main() {
