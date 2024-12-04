@@ -18,8 +18,8 @@ Usage Example Here's an example of how to use goLlama to interact with Ollama's 
     		url := "http://localhost:11434/api/generate"
 
 		// Specify the model and the prompt
-   		model := "llama3"
-    		prompt := "Explain quantum physics in simple terms."
+   			model := "llama3"
+    			prompt := "Explain quantum physics in simple terms."
 
     		// Send a request to the API and get the response
     		response, err := goLlama.GenerateResponse(url, model, prompt)
