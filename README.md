@@ -2,122 +2,175 @@
 
 <div align="center">
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/Role1776/goLama.svg)](https://pkg.go.dev/github.com/Role1776/goLama)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Role1776/goLama/lama.svg)](https://pkg.go.dev/github.com/Role1776/goLama/lama)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Role1776/goLama)](https://goreportcard.com/report/github.com/Role1776/goLama)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
 
-> 🚀 A lightning-fast Go library for seamless interaction with LLaMA language models through a clean and intuitive HTTP API interface.
+> 🚀 A fast and simple Go library for interacting with APIs compatible with `llama.cpp` or `Ollama` for text generation, providing both streaming and synchronous modes of operation.
 
 ## ✨ Highlights
 
-- 🎯 **Simple & Intuitive** - Clean API design that just works
-- 🛡️ **Robust Error Handling** - Comprehensive error management with detailed logging
-- ⚡ **High Performance** - Optimized for speed and efficiency
-- 🔄 **Streaming Support** - Real-time response streaming capabilities
-- 🛠️ **Highly Configurable** - Flexible timeout and model settings
+*   🎯 **Simple & Intuitive** - Clean API design that just works.
+*   🛡️ **Robust Error Handling** - Comprehensive error management with detailed logging.
+*   ⚡ **High Performance** - Optimized for speed and efficiency.
+*  🔄  **Streaming Support** - Real-time response streaming capabilities.
+*   🛠️ **Highly Configurable** - Flexible timeout settings.
+* ⚙️ **Reliable:** Asynchronous processing through goroutines.
+
 
 ## 🚀 Quick Start
 
 ### Installation
-
-```bash
-go get github.com/Role1776/goLama
+```bash 
+    go get github.com/Role1776/goLama/lama
 ```
 
-### Example Usage
+Markdown
+Example Usage
+Streaming Response
 
-```go
-package main
+```go    
+    package main
 
-import (
-    "fmt"
-    "github.com/Role1776/goLama/lama"
-)
+    import (
+	    "fmt"
+	    "time"
 
-func main() {
-    // Initialize your LLaMA endpoint
-    url := "http://localhost:11434/api/generate"
+	    "github.com/Role1776/goLama/lama"
+    )
+
+    func main() {
+        // Set your LLM endpoint URL
+        url := "http://localhost:11434/api/generate"
     
-    // Configure your request
-    model := "llama3"
-    prompt := "Explain quantum physics in simple terms."
+        // Configure your request
+        model := "llama3"
+        prompt := "Explain quantum physics in simple terms."
+	    timeout := 0 * time.Second // 0 means using default timeout - 100 seconds
 
-    // Generate response
-    response, err := lama.GenerateResponse(url, model, prompt)
-    if err != nil {
-        fmt.Println("❌ Error:", err)
-        return
+        fmt.Println("✨ Streaming Output:")
+        // Get the response through streaming channels
+        respChan, errChan := lama.GenerateResponse(url, model, prompt, timeout)
+	    for {
+		    select {
+		    case resp := <-respChan:
+                fmt.Print(resp.Response)
+                if resp.Done{
+                    fmt.Println("\n✨ Done Streaming.")
+				    return
+                }
+		    case err := <-errChan:
+			    if err != nil {
+				    fmt.Println("❌ Error:", err)
+				    return
+			    }
+		    }
+	    }
     }
-
-    fmt.Println("✨ Response:", response)
-}
 ```
+Synchronous Response
+```go  
+    package main
 
-## 📚 API Reference
+    import (
+	    "fmt"
+	    "time"
 
-### 🔧 GenerateResponse
+	    "github.com/Role1776/goLama/lama"
+    )
 
-```go
-func GenerateResponse(url, model, prompt string) (string, error)
-```
+    func main() {
+        // Set your LLM endpoint URL
+        url := "http://localhost:11434/api/generate"
+    
+        // Configure your request
+        model := "llama3"
+        prompt := "Explain quantum physics in simple terms."
+	    timeout := 0 * time.Second // 0 means using default timeout - 100 seconds
+        fmt.Println("✨ Synchronous Response:")
+	    // Get all response as one string
+        response := lama.SyncResponse(url, model, prompt, timeout)
+	    if response != ""{
+		    fmt.Println("✨ Response:", response)
+		    fmt.Println("\n✨ Done.")
+	    } else {
+		    fmt.Println("❌ Error in  response (look at logs)")
+	    }
+    }
+``` 
+📚 API Reference
+🔧 GenerateResponse
+```go 
+    func GenerateResponse(url string, model string, prompt string, timeout time.Duration) (<-chan models.Response, <-chan error)
+``` 
+Sends a request to the specified API endpoint to generate text and returns two channels, using streaming mode of response receiving.
 
-Generates an AI response using your specified LLaMA model.
+Parameters
+Name	Type	Description
+url	string	Your API endpoint URL
+model	string	LLM model identifier
+prompt	string	Your input prompt text
+timeout	time.Duration	Request timeout. (0 will use default timeout, 100 sec).
+Returns
+<-chan models.Response: A channel of type models.Response, used for streaming generated text
 
-#### Parameters
-| Name | Type | Description |
-|------|------|-------------|
-| url | string | Your API endpoint URL |
-| model | string | LLaMA model identifier |
-| prompt | string | Your input prompt |
+<-chan error: Channel for handling any encountered errors
 
-#### Returns
-- `string`: The generated response
-- `error`: Error information if the request fails
+🔧 SyncResponse
+```go 
+    func SyncResponse(url string, model string, prompt string, timeout time.Duration) string
+``` 
+Sends a request and returns the entire generated text as a string when completed, if failed will return the empty string.
 
-## 🛡️ Error Handling
+Parameters
+Name	Type	Description
+url	string	Your API endpoint URL
+model	string	LLM model identifier
+prompt	string	Your input prompt text
+timeout	time.Duration	Request timeout. (0 will use default timeout, 100 sec).
+Returns
+string: The generated text response; will return empty string if the request failed
 
+🛡️ Error Handling
 GoLama provides comprehensive error handling for:
-- 🌐 Network request failures
-- 📊 Status code validation
-- 🔄 JSON processing
-- 📝 Response handling
+
+🌐 Network request failures
+
+📊 Invalid HTTP status codes
+
+🔄 JSON processing issues
+
+📝 Response handling
 
 All errors are automatically logged and include detailed context for debugging.
 
-## ⚙️ Configuration
-
-```go
-const defaultTimeout = 100 * time.Second
-```
-
+⚙️ Configuration
+```go 
+    const defaultTimeout = 100 * time.Second
+``` 
 Customize the timeout setting to match your needs.
 
-## 📦 Response Format
+📦 Response Format
+```go 
+    {
+        "response": "Generated text response",
+        "done": true
+    }
+``` 
 
-```json
-{
-    "model": "llama3",
-    "created_at": "2024-01-20T12:00:00Z",
-    "response": "Generated text response",
-    "done": true
-}
-```
-
-## 🤝 Contributing
-
+🤝 Contributing
 Contributions make the open source community amazing! Feel free to:
 
-- 🐛 Report bugs
-- 💡 Suggest features
-- 🔧 Submit PRs
+🐛 Report bugs
 
-## 📄 License
+💡 Suggest new features
 
+🔧 Submit PRs
+
+📄 License
 MIT License - feel free to use this in your projects!
-
----
 
 <div align="center">
 Made with ❤️ by the Go community
