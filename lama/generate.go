@@ -3,42 +3,52 @@ package lama
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
-	"github.com/Role1776/goLama/utils"
+	"net/http"
+	"time"
+
+	"github.com/Role1776/goLama/models"
 )
 
-func GenerateResponse(url, model, prompt string) (string, error) {
-	payload := createPayload(model, prompt)
+func GenerateResponse(url string, model string, prompt string, timeout time.Duration) (<-chan models.Response, <-chan error) {
+	payload := createPayload{
+		Model:  model,
+		Prompt: prompt,
+	}
 
 	payloadJSON, err := json.Marshal(payload)
+
+	errChan := make(chan error)
+
 	if err != nil {
-		err = fmt.Errorf("failed to marshal payload for model %s and prompt %s: %v", model, prompt, err)
-		utils.Logger(err)
-		return "", err
+		errChan <- fmt.Errorf("failed to marshal payload: %v", err)
+
+		return nil, errChan
 	}
 
-	resp, err := sendRequest(url, payloadJSON) 
-	if err != nil {
-		err = fmt.Errorf("failed to send request to URL %s: %v", url, err)
-		utils.Logger(err)
-		return "", err
-	}
-	defer resp.Body.Close()
+	respChan := make(chan models.Response)
 
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("unexpected status code %d from URL %s: expected 200 OK", resp.StatusCode, url)
-		utils.Logger(err)
-		return "", err
-	}
+	go func() {
+		defer close(respChan)
+		defer close(errChan)
 
-	fullResponse, err := handleResponse(resp.Body)
-	if err != nil {
-		err = fmt.Errorf("failed to handle response body from URL %s: %v", url, err)
-		utils.Logger(err)
-		return "", err
-	}
+		resp, err := sendRequest(url, payloadJSON, timeout)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to send request: %v", err)
 
-	return fullResponse, nil
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			errChan <- fmt.Errorf("unexpected status code %d: %v", resp.StatusCode, fmt.Errorf("expected 200 OK"))
+
+			return
+		}
+
+		handleResponse(resp.Body, respChan, errChan)
+
+	}()
+
+	return respChan, errChan
 }
-
