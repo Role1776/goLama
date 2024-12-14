@@ -2,30 +2,25 @@ package lama
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/Role1776/goLama/models"
 )
 
-func handleResponse(respBody io.Reader) (string, error) {
-	var fullResponse string
-	decoder := json.NewDecoder(respBody)
-
+func handleResponse(body io.Reader, respChan chan<- models.Response, errChan chan<- error) {
+	decoder := json.NewDecoder(body)
 	for {
-		var response models.Response
-		if err := decoder.Decode(&response); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return "", err
+		var resp models.Response
+		if err := decoder.Decode(&resp); err != nil {
+			errChan <- fmt.Errorf("failed to decode response: %v", err)
+			return
 		}
 
-		fullResponse += response.Response
+		respChan <- resp
 
-		if response.Done {
-			break
+		if resp.Done {
+			return
 		}
 	}
-
-	return fullResponse, nil
 }
