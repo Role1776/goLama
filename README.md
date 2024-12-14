@@ -38,7 +38,7 @@ Streaming Response
 	    "fmt"
 	    "time"
 
-	    "github.com/Role1776/goLama/lama"
+	    "github.com/Role1776/goLama"
     )
 
     func main() {
