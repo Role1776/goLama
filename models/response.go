@@ -1,8 +1,7 @@
 package models
 
+// Response представляет ответ от LLama API
 type Response struct {
-	Model     string `json:"model"`
-	CreatedAt string `json:"created_at"`
-	Response  string `json:"response"`
-	Done      bool   `json:"done"`
+	Response string `json:"response"`
+	Done     bool   `json:"done"`
 }
