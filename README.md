@@ -24,7 +24,7 @@
 
 ### Installation
 ```bash 
-    go get github.com/Role1776/goLama/lama
+    go get github.com/Role1776/goLama
 ```
 
 Markdown
